@@ -15,7 +15,7 @@ METRICS_JSON = "graphs/metrics_report.json"
 OUT_DIR = Path("graphs/validation")
 
 def load_db_predictions():
-    print("[1] A ler as previsões reais do sistema na SQLite...")
+    print("[1] Reading real system predictions from SQLite...")
     conn = sqlite3.connect(DB_PATH)
     query = """
         SELECT r.id, r.original_text, r.taxonomy_category, MAX(rel.confidence_score) as max_score
@@ -29,20 +29,20 @@ def load_db_predictions():
     return df
 
 def run_real_validation():
-    # Garantir que a pasta de destino existe
+    # Ensure the destination folder exists
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     
     df_preds = load_db_predictions()
     if df_preds.empty:
-        print("[!] Erro: A base de dados sna.db está vazia. Corre o ingest.py primeiro!")
+        print("[!] Error: The sna.db database is empty. Run ingest.py first!")
         return
         
-    print("[2] A descarregar o Ground Truth real do Berkeley dataset...")
+    print("[2] Downloading real Ground Truth from the Berkeley dataset...")
     ds = load_dataset("ucberkeley-dlab/measuring-hate-speech", "default", split="train")
     df_hf = ds.to_pandas()
     
     # CRITICAL: TEXT ALIGNMENT 
-    print("[3] A alinhar os textos da base de dados com as anotações originais...")
+    print("[3] Aligning database texts with the original annotations...")
     
     # Clean text to ensure exact matching
     df_preds['clean_text'] = df_preds['original_text'].str.strip().str.lower()
@@ -55,10 +55,10 @@ def run_real_validation():
     merged = merged.groupby(['id', 'original_text', 'taxonomy_category', 'max_score'], as_index=False)['hate_speech_score'].mean()
     
     num_samples = len(merged)
-    print(f"[*] Sucesso: {num_samples} amostras alinhadas perfeitamente!")
+    print(f"[*] Success: {num_samples} samples perfectly aligned!")
     
     if num_samples == 0:
-        print("[!] Erro: Não foi possível alinhar nenhum texto.")
+        print("[!] Error: Could not align any text.")
         return
     
     # 1. Define y_true (Berkeley Ground Truth: > 0 indicates hate presence)
@@ -87,7 +87,7 @@ def run_real_validation():
     plt.ylabel('Anotadores Humanos (Berkeley)', fontsize=11)
     plt.xlabel('Previsão do LLM', fontsize=11)
     plt.tight_layout()
-    # Gravado a 300 DPI para alta resolução (Thesis Quality)
+    # Saved at 300 DPI for high resolution (Thesis Quality)
     plt.savefig(OUT_DIR / "confusion_matrix.png", dpi=300)
     plt.close()
     
@@ -126,13 +126,13 @@ def run_real_validation():
     plt.title('Curva ROC Autêntica do Sistema', pad=15, fontsize=13, fontweight='bold')
     plt.legend(loc="lower right", fontsize=11, frameon=True, shadow=True)
     plt.tight_layout()
-    # Nome ajustado para sincronizar com a aba de Validação Científica do app.py
+    # Name adjusted to sync with the Scientific Validation tab in app.py
     plt.savefig(OUT_DIR / "roc_curve.png", dpi=300)
     plt.close()
     
     # CHART 4: NETWORK METRICS (SNA)
     
-    print("[4] A analisar Métricas de Rede (Graph Analytics)...")
+    print("[4] Analyzing Network Metrics (Graph Analytics)...")
     if Path(METRICS_JSON).exists():
         with open(METRICS_JSON, 'r', encoding='utf-8') as f:
             sna_data = json.load(f)
@@ -150,9 +150,9 @@ def run_real_validation():
             plt.tight_layout()
             plt.savefig(OUT_DIR / "pagerank_top10.png", dpi=300)
             plt.close()
-            print("[✓] Gráfico de Análise de Redes (SNA) gerado!")
+            print("[✓] Network Analysis (SNA) chart generated!")
     else:
-        print("[!] analytics.py não foi executado ou metrics_report.json não existe.")
+        print("[!] analytics.py was not executed or metrics_report.json does not exist.")
 
     # METRICS REPORT
 
@@ -163,12 +163,12 @@ def run_real_validation():
 
     report_txt = (
         "====================================================\n"
-        "     RELATÓRIO DE MÉTRICAS REAIS - PIPELINE SNA     \n"
+        "        REAL METRICS REPORT - SNA PIPELINE          \n"
         "====================================================\n"
-        f"Amostras Alinhadas   : {num_samples}\n"
-        f"Accuracy  (Exatidão) : {acc:.4f} ({acc*100:.1f}%)\n"
-        f"Precision (Precisão) : {prec:.4f} ({prec*100:.1f}%)\n"
-        f"Recall    (Sensib.)  : {rec:.4f} ({rec*100:.1f}%)\n"
+        f"Aligned Samples      : {num_samples}\n"
+        f"Accuracy             : {acc:.4f} ({acc*100:.1f}%)\n"
+        f"Precision            : {prec:.4f} ({prec*100:.1f}%)\n"
+        f"Recall               : {rec:.4f} ({rec*100:.1f}%)\n"
         f"F1-Score             : {f1:.4f} ({f1*100:.1f}%)\n"
         f"ROC AUC              : {roc_auc_final:.4f}\n"
         "====================================================\n"
@@ -178,7 +178,7 @@ def run_real_validation():
         f.write(report_txt)
         
     print(report_txt)
-    print(f"[✓] Validação real concluída. Gráficos em alta resolução na pasta: {OUT_DIR}")
+    print(f"[✓] Real validation completed. High-resolution charts in folder: {OUT_DIR}")
 
 if __name__ == "__main__":
     run_real_validation()
