@@ -69,6 +69,12 @@ Before you begin, make sure you have the following installed:
 **1. Clone the repository** (or organize the files in a folder):
 
 ```bash
+git clone https://github.com/DinisAmado/LLM-Sentiment-Analysis.git
+cd LLM-Sentiment-Analysis
+```
+
+
+```bash
 mkdir sna-analysis && cd sna-analysis
 # Place all .py files inside the src/ folder
 ```
@@ -265,3 +271,6 @@ The system classifies relationships following a descending severity order:
 | Sentiment — English (Tier 2) | `cardiffnlp/twitter-roberta-base-sentiment-latest` |
 | Sentiment — Multilingual (Tier 2) | `lxyuan/distilbert-base-multilingual-cased-sentiments-student` |
 | Severity escalation (Tier 3) | `meta-llama/Meta-Llama-3-8B-Instruct` |
+
+---
+*Developed by Dinis Amado as the Final Project for the Bachelor's Degree in Informatics Engineering at Universidade da Beira Interior (2026).*
