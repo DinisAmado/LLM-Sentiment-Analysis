@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project Specific — SNA Analysis API Logs
+# Ignores all temporary runtime log files but keeps the directory structure via .gitkeep
+logs/*.log
